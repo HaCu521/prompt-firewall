@@ -2,7 +2,7 @@ import json
 import re
 
 MAILS = []
-for line in open("data/train.jsonl", encoding="utf-8"):
+for line in open("data/test.jsonl", encoding="utf-8"):
     if line.strip() == "":
         continue
     row = json.loads(line)
