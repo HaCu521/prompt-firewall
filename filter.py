@@ -6,17 +6,21 @@ for line in open("data/train.jsonl", encoding="utf-8"):
     if line.strip() == "":
         continue
     row = json.loads(line)
-    MAILS.append({"text": row["text"].replace("\n\n", " "), "attack": row["payload"], "clean": row["clean"]})
+    MAILS.append({"text": row["text"], "payload": row["payload"], "clean": row["clean"]})
 
+#baseline 2 test
 def apply_filter(words, text):
     """splits text into sentences and removes sentences containing a word"""
-    sentences = re.split(r"(?<=[.!?])\s+", text) 
+    sentences = re.split(r"(?<=[.!?])\s+|\n+", text)
     kept_sentences = [s for s in sentences if not any(w in s.lower() for w in words)]
-    return " ".join(kept_sentences)
+    if len(kept_sentences) == len(sentences):
+        return text
+    else:
+        return " ".join(kept_sentences)
 
 def fitness(words):
-    """Returns filter value, """
-    attacked = [m for m in MAILS if m["attack"]]
+    """Returns filter value"""
+    attacked = [m for m in MAILS if m["payload"]]
 
     removed = 0    # attacks that are gone
     cleaned = 0    # emails in which the filter deleted anything
@@ -25,7 +29,7 @@ def fitness(words):
         if filtered != m["text"]:
             cleaned += 1
 
-        if m["attack"] and filtered == m["clean"]:
+        if m["payload"] and filtered == m["clean"]:
             removed += 1
 
     recall = removed / len(attacked)
